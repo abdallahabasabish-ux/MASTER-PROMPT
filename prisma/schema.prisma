@@ -141,3 +141,94 @@ model AuditLog {
   ipAddress  String?
   timestamp  DateTime @default(now())
 }
+// ... النماذج السابقة (User, Student, Teacher, Stage, Grade, Term)
+
+model Subject {
+  id        String   @id @default(cuid())
+  name      String   // مثلاً: العلوم
+  code      String?  // اختصار
+  grade     Grade?   @relation(fields: [gradeId], references: [id])
+  gradeId   String?
+  units     Unit[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Unit {
+  id        String   @id @default(cuid())
+  name      String
+  order     Int
+  subject   Subject? @relation(fields: [subjectId], references: [id])
+  subjectId String?
+  grade     Grade?   @relation(fields: [gradeId], references: [id])
+  gradeId   String?
+  term      Term?    @relation(fields: [termId], references: [id])
+  termId    String?
+  lessons   Lesson[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Lesson {
+  id          String      @id @default(cuid())
+  title       String
+  description String?     // وصف قصير
+  coverImage  String?     // رابط صورة الغلاف
+  status      LessonStatus @default(DRAFT)
+  order       Int         // ترتيب الدرس داخل الوحدة
+  unit        Unit        @relation(fields: [unitId], references: [id])
+  unitId      String
+  teacher     Teacher     @relation(fields: [teacherId], references: [id])
+  teacherId   String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  publishedAt DateTime?   // تاريخ النشر
+
+  content     LessonContent? // محتوى نصي غني (one-to-one)
+  videos      LessonVideo[]
+  files       LessonFile[]
+  assignments Assignment[]
+}
+
+enum LessonStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model LessonContent {
+  id        String   @id @default(cuid())
+  lesson    Lesson   @relation(fields: [lessonId], references: [id])
+  lessonId  String   @unique
+  content   String   // HTML أو JSON بعد التنظيف
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LessonVideo {
+  id        String   @id @default(cuid())
+  lesson    Lesson   @relation(fields: [lessonId], references: [id])
+  lessonId  String
+  provider  VideoProvider @default(YOUTUBE)
+  url       String   // رابط الفيديو
+  isMain    Boolean  @default(false) // فيديو رئيسي
+  createdAt DateTime @default(now())
+}
+
+enum VideoProvider {
+  YOUTUBE
+  EXTERNAL
+  CLOUDFLARE_STREAM
+  S3
+}
+
+model LessonFile {
+  id             String   @id @default(cuid())
+  lesson         Lesson   @relation(fields: [lessonId], references: [id])
+  lessonId       String
+  fileName       String
+  fileSize       Int      // بالبايت
+  filePath       String   // مسار التخزين (أو URL)
+  allowDownload  Boolean  @default(false)
+  uploadedAt     DateTime @default(now())
+}
