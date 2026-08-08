@@ -1,0 +1,143 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  fullName     String
+  phone        String?
+  role         Role     @default(STUDENT)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
+
+  student Student?
+  teacher Teacher?
+  notifications Notification[]
+  auditLogs     AuditLog[]
+  payments      Payment[]
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+model Student {
+  id                 String   @id @default(cuid())
+  user               User     @relation(fields: [userId], references: [id])
+  userId             String   @unique
+  stageId            String?
+  gradeId            String?
+  termId             String?
+  parentPhone        String?
+  subscriptionStatus SubscriptionStatus @default(PENDING)
+  subscriptionEnd    DateTime?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  stage Stage? @relation(fields: [stageId], references: [id])
+  grade Grade? @relation(fields: [gradeId], references: [id])
+  term  Term?  @relation(fields: [termId], references: [id])
+
+  submissions  Submission[]
+  examAttempts ExamAttempt[]
+  progress     Progress[]
+  results      Result[]
+  payments     Payment[]
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PENDING
+  EXPIRED
+  CANCELLED
+  SUSPENDED
+}
+
+model Teacher {
+  id         String   @id @default(cuid())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String   @unique
+  bio        String?
+  experience String?
+  photoUrl   String?
+  status     TeacherStatus @default(PENDING)
+  approvedAt DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  lessons    Lesson[]
+  assignments Assignment[]
+  exams      Exam[]
+  questions  Question[]
+}
+
+enum TeacherStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+// باقي النماذج (Stage, Grade, Term, Subject, Unit, Lesson, ...) ستضاف في Phase 2
+// لكننا نضيف الأساسيات لتشغيل المصادقة.
+
+model Stage {
+  id      String   @id @default(cuid())
+  name    String
+  order   Int
+  grades  Grade[]
+  students Student[]
+}
+
+model Grade {
+  id      String   @id @default(cuid())
+  name    String
+  order   Int
+  stage   Stage?   @relation(fields: [stageId], references: [id])
+  stageId String?
+  students Student[]
+  terms    Term[]
+}
+
+model Term {
+  id      String   @id @default(cuid())
+  name    String
+  order   Int
+  grade   Grade?   @relation(fields: [gradeId], references: [id])
+  gradeId String?
+  students Student[]
+}
+
+// نماذج الإشعارات والسجلات
+model Notification {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  title     String
+  message   String
+  type      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  action     String
+  targetType String
+  targetId   String?
+  metadata   Json?
+  ipAddress  String?
+  timestamp  DateTime @default(now())
+}
