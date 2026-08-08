@@ -535,3 +535,62 @@ model Result {
 
   @@unique([submissionId, examAttemptId]) // أحدهما فقط
 }
+// ========== تقدم الطالب ==========
+
+// تتبع مشاهدة الفيديوهات (نسبة التقدم)
+model VideoProgress {
+  id           String   @id @default(cuid())
+  student      Student  @relation(fields: [studentId], references: [id])
+  studentId    String
+  video        LessonVideo @relation(fields: [videoId], references: [id])
+  videoId      String
+  progress     Float    @default(0) // 0.0 - 100.0
+  lastPosition Float    @default(0) // آخر موقف بالثواني (للإستئناف لاحقاً)
+  isCompleted  Boolean  @default(false) // إذا تجاوز 90%
+  updatedAt    DateTime @updatedAt
+
+  @@unique([studentId, videoId])
+}
+
+// تقدم الدرس الكلي (مكتمل أم لا)
+model LessonProgress {
+  id           String   @id @default(cuid())
+  student      Student  @relation(fields: [studentId], references: [id])
+  studentId    String
+  lesson       Lesson   @relation(fields: [lessonId], references: [id])
+  lessonId     String
+  status       LessonProgressStatus @default(NOT_STARTED)
+  // شروط الإكمال
+  videoCompleted   Boolean @default(false)
+  contentViewed    Boolean @default(false) // هل فتح المحتوى النصي؟
+  assignmentDone   Boolean @default(false) // هل أنهى الواجب المرتبط؟
+  examDone         Boolean @default(false) // هل أنهى الامتحان المرتبط؟
+  completedAt      DateTime?
+  lastActivityAt   DateTime @default(now())
+  studyTimeSeconds Int      @default(0) // إجمالي وقت المذاكرة لهذا الدرس
+
+  @@unique([studentId, lessonId])
+}
+
+enum LessonProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+// إحصائيات الطالب الإجمالية (يمكن حسابها مباشرة، لكن نخزنها للتسريع)
+model StudentStats {
+  id                    String   @id @default(cuid())
+  student               Student  @relation(fields: [studentId], references: [id])
+  studentId             String   @unique
+  totalLessons          Int      @default(0)
+  completedLessons      Int      @default(0)
+  totalAssignments      Int      @default(0)
+  completedAssignments  Int      @default(0)
+  totalExams            Int      @default(0)
+  completedExams        Int      @default(0)
+  averageScore          Float    @default(0)
+  totalStudyTimeSeconds Int      @default(0) // إجمالي وقت الدراسة على المنصة
+  lastActiveAt          DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
