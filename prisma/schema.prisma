@@ -594,3 +594,69 @@ model StudentStats {
   lastActiveAt          DateTime @default(now())
   updatedAt             DateTime @updatedAt
 }
+// ========== خطط الاشتراك ==========
+model SubscriptionPlan {
+  id            String   @id @default(cuid())
+  name          String   // "الشهري", "السنوي" (مستقبلاً)
+  description   String?  @db.Text
+  price         Float    // السعر بالجنيه المصري
+  durationDays  Int      // 30 للشهري
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  payments      Payment[]
+}
+
+// ========== المدفوعات ==========
+model Payment {
+  id            String       @id @default(cuid())
+  student       Student      @relation(fields: [studentId], references: [id])
+  studentId     String
+  plan          SubscriptionPlan @relation(fields: [planId], references: [id])
+  planId        String
+  amount        Float
+  paymentMethod PaymentMethod @default(VODAFONE_CASH)
+  status        PaymentStatus @default(PENDING)
+  proofImage    String?      // مسار صورة الإثبات
+  notes         String?      // ملاحظات من الطالب
+  submittedAt   DateTime     @default(now())
+  reviewedBy    User?        @relation(fields: [reviewedById], references: [id])
+  reviewedById  String?
+  reviewedAt    DateTime?
+  rejectionReason String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+enum PaymentMethod {
+  VODAFONE_CASH
+  ORANGE_CASH
+  INSTAPAY
+}
+
+enum PaymentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+// ========== تعديل جدول Student لإضافة حقول الاشتراك ==========
+// نضيف هذه الحقول إلى نموذج Student الموجود:
+model Student {
+  // ... الحقول السابقة
+  subscriptionStatus SubscriptionStatus @default(PENDING)
+  subscriptionStart  DateTime?
+  subscriptionEnd    DateTime?
+  // ...
+}
+
+// حالات الاشتراك (بالفعل موجودة، نؤكد عليها)
+enum SubscriptionStatus {
+  ACTIVE
+  PENDING
+  EXPIRED
+  CANCELLED
+  SUSPENDED
+}
