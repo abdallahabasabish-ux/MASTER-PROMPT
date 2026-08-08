@@ -400,3 +400,138 @@ enum ResultStatus {
   PARTIALLY_GRADED
   COMPLETED
 }
+// ========== الامتحانات ==========
+model Exam {
+  id                String        @id @default(cuid())
+  title             String
+  description       String?       @db.Text
+  type              ExamType      @default(WEEKLY)
+  grade             Grade         @relation(fields: [gradeId], references: [id])
+  gradeId           String
+  unit              Unit?         @relation(fields: [unitId], references: [id])
+  unitId            String?
+  durationMinutes   Int           @default(30)
+  totalMarks        Float         @default(10)
+  startDate         DateTime?
+  endDate           DateTime?
+  attemptsAllowed   Int           @default(1)
+  status            ExamStatus    @default(DRAFT)
+  createdBy         Teacher       @relation(fields: [teacherId], references: [id])
+  teacherId         String
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  questions         ExamQuestion[]
+  attempts          ExamAttempt[]
+}
+
+enum ExamType {
+  WEEKLY
+  MONTHLY
+}
+
+enum ExamStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model ExamQuestion {
+  id          String   @id @default(cuid())
+  exam        Exam     @relation(fields: [examId], references: [id])
+  examId      String
+  question    Question @relation(fields: [questionId], references: [id])
+  questionId  String
+  order       Int
+
+  @@unique([examId, questionId])
+}
+
+model ExamAttempt {
+  id                 String            @id @default(cuid())
+  student            Student           @relation(fields: [studentId], references: [id])
+  studentId          String
+  exam               Exam              @relation(fields: [examId], references: [id])
+  examId             String
+  attemptNumber      Int               @default(1)
+  startedAt          DateTime          @default(now())
+  submittedAt        DateTime?
+  timeTakenSeconds   Int?
+  status             ExamAttemptStatus @default(IN_PROGRESS)
+  marksObtained      Float?
+  gradedBy           Teacher?          @relation(fields: [gradedById], references: [id])
+  gradedById         String?
+  gradedAt           DateTime?
+
+  // تخزين حالة الأسئلة (للـ Mark for Review) كـ JSON
+  questionsState     Json? // { "questionId": "answered|unanswered|marked" }
+
+  answers            ExamAnswer[]
+  result             Result?          // النتيجة النهائية (one-to-one)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+}
+
+enum ExamAttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+  AUTO_SUBMITTED
+  GRADED_PARTIAL
+  COMPLETED
+}
+
+model ExamAnswer {
+  id            String       @id @default(cuid())
+  attempt       ExamAttempt  @relation(fields: [attemptId], references: [id])
+  attemptId     String
+  question      Question     @relation(fields: [questionId], references: [id])
+  questionId    String
+  // الإجابة: نص (للمقالي) أو JSON (للخيارات)
+  answerText    String?      @db.Text
+  answerJson    Json?
+  isCorrect     Boolean?     // للموضوعي
+  marksAwarded  Float?
+  reviewedBy    Teacher?     @relation(fields: [reviewedById], references: [id])
+  reviewedById  String?
+  reviewedAt    DateTime?
+}
+
+// ========== تحديث Result ليشمل الامتحانات ==========
+// يمكننا إضافة حقلين في Result أو إبقائها منفصلة، لكن الأفضل توحيدها:
+// نضيف حقولاً اختيارية في Result
+// أو نضيف نموذج منفصل للامتحانات، لكن التوحيد أفضل.
+// سنقوم بتعديل Result لدعم الامتحانات:
+// نضيف examAttemptId و examId اختياريين، ونحتفظ بـ submissionId
+// لكن لتجنب التعديل على النموذج السابق، سنقوم بإنشاء Result موحد مع حقول:
+// referenceType: ASSIGNMENT | EXAM
+// referenceId: (إما submissionId أو examAttemptId)
+// أو ببساطة نربط Result بـ ExamAttempt عبر relation اختيارية.
+// سأقوم بإضافة relation جديدة في Result:
+
+model Result {
+  id               String         @id @default(cuid())
+  student          Student        @relation(fields: [studentId], references: [id])
+  studentId        String
+  // للواجبات
+  submission       Submission?    @relation(fields: [submissionId], references: [id])
+  submissionId     String?        @unique
+  // للامتحانات
+  examAttempt      ExamAttempt?   @relation(fields: [examAttemptId], references: [id])
+  examAttemptId    String?        @unique
+
+  totalMarks       Float
+  obtainedMarks    Float
+  percentage       Float
+  correctCount     Int
+  wrongCount       Int
+  unattemptedCount Int
+  timeTakenSeconds Int?
+  attemptNumber    Int
+  status           ResultStatus   @default(PENDING)
+  gradedAt         DateTime?
+
+  // تحديد المصدر
+  referenceType    String // "ASSIGNMENT" or "EXAM"
+
+  @@unique([submissionId, examAttemptId]) // أحدهما فقط
+}
