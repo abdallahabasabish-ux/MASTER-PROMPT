@@ -660,3 +660,30 @@ enum SubscriptionStatus {
   CANCELLED
   SUSPENDED
 }
+// ========== تخصيص المدرس ==========
+model TeacherGradeSubject {
+  id         String   @id @default(cuid())
+  teacher    Teacher  @relation(fields: [teacherId], references: [id])
+  teacherId  String
+  grade      Grade    @relation(fields: [gradeId], references: [id])
+  gradeId    String
+  subject    Subject  @relation(fields: [subjectId], references: [id])
+  subjectId  String
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  @@unique([teacherId, gradeId, subjectId])
+}
+
+// نضيف أيضاً في نموذج Teacher:
+model Teacher {
+  // ... الحقول السابقة
+  gradeSubjects TeacherGradeSubject[]
+}
+
+// وتعديل نموذج Lesson ليشمل subjectId (يمكن استخلاصه من unit.subject)
+// لكن الأفضل أن نضيف مباشرة:
+model Lesson {
+  // ... الحقول السابقة
+  subjectId String? // اختياري، يمكن استخلاصه من unitId
+}
