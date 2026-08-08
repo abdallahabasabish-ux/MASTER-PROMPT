@@ -232,3 +232,171 @@ model LessonFile {
   allowDownload  Boolean  @default(false)
   uploadedAt     DateTime @default(now())
 }
+// ========== بنك الأسئلة ==========
+model Question {
+  id           String            @id @default(cuid())
+  type         QuestionType      @default(MULTIPLE_CHOICE)
+  difficulty   Difficulty        @default(MEDIUM)
+  questionText String            @db.Text
+  marks        Float             @default(1)
+  // التصنيفات
+  stageId      String?
+  gradeId      String?
+  termId       String?
+  unitId       String?
+  lessonId     String?
+  // المنشئ
+  teacher      Teacher           @relation(fields: [teacherId], references: [id])
+  teacherId    String
+  // العلاقات
+  stage        Stage?            @relation(fields: [stageId], references: [id])
+  grade        Grade?            @relation(fields: [gradeId], references: [id])
+  term         Term?             @relation(fields: [termId], references: [id])
+  unit         Unit?             @relation(fields: [unitId], references: [id])
+  lesson       Lesson?           @relation(fields: [lessonId], references: [id])
+  // خيارات (للموضوعي)
+  options      QuestionOption[]
+  // الربط بالواجبات والامتحانات
+  assignmentQuestions AssignmentQuestion[]
+  examQuestions       ExamQuestion[]
+  // إجابات الطلاب
+  answers      Answer[]
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  MULTIPLE_SELECT
+  FILL_BLANK
+  ESSAY
+  ORDERING
+  MATCHING
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+model QuestionOption {
+  id         String   @id @default(cuid())
+  question   Question @relation(fields: [questionId], references: [id])
+  questionId String
+  optionText String   @db.Text
+  isCorrect  Boolean  @default(false)
+  order      Int
+}
+
+// ========== الواجبات ==========
+model Assignment {
+  id                String     @id @default(cuid())
+  title             String
+  description       String?    @db.Text
+  lesson            Lesson     @relation(fields: [lessonId], references: [id])
+  lessonId          String
+  durationMinutes   Int        @default(30)
+  attemptsAllowed   Int        @default(1)
+  startDate         DateTime?
+  endDate           DateTime?
+  totalMarks        Float      @default(10)
+  status            AssignmentStatus @default(DRAFT)
+  createdBy         Teacher    @relation(fields: [teacherId], references: [id])
+  teacherId         String
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  questions         AssignmentQuestion[]
+  submissions       Submission[]
+}
+
+enum AssignmentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model AssignmentQuestion {
+  id             String     @id @default(cuid())
+  assignment     Assignment @relation(fields: [assignmentId], references: [id])
+  assignmentId   String
+  question       Question   @relation(fields: [questionId], references: [id])
+  questionId     String
+  order          Int
+}
+
+// ========== محاولات الطالب ==========
+model Submission {
+  id               String           @id @default(cuid())
+  student          Student          @relation(fields: [studentId], references: [id])
+  studentId        String
+  assignment       Assignment       @relation(fields: [assignmentId], references: [id])
+  assignmentId     String
+  attemptNumber    Int              @default(1)
+  startedAt        DateTime         @default(now())
+  submittedAt      DateTime?
+  timeTakenSeconds Int?             // وقت الحل بالثواني
+  status           SubmissionStatus @default(IN_PROGRESS)
+  marksObtained    Float?           // الدرجة النهائية (بعد التصحيح الكامل)
+  gradedBy         Teacher?         @relation(fields: [gradedById], references: [id])
+  gradedById       String?
+
+  answers          Answer[]
+  result           Result?          // النتيجة النهائية (one-to-one)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+enum SubmissionStatus {
+  IN_PROGRESS
+  SUBMITTED
+  AUTO_SUBMITTED
+  GRADED_PARTIAL
+  COMPLETED
+}
+
+model Answer {
+  id           String     @id @default(cuid())
+  submission   Submission @relation(fields: [submissionId], references: [id])
+  submissionId String
+  question     Question   @relation(fields: [questionId], references: [id])
+  questionId   String
+  // الإجابة: نص (للمقالي) أو JSON (للخيارات أو الترتيب)
+  answerText   String?    @db.Text
+  answerJson   Json?      // لتخزين مصفوفة من IDs أو ترتيب
+  isCorrect    Boolean?   // للأسئلة الموضوعية (محسوبة آلياً)
+  marksAwarded Float?     // الدرجة الممنوحة (يدوياً أو آلياً)
+  reviewedBy   Teacher?   @relation(fields: [reviewedById], references: [id])
+  reviewedById String?
+  reviewedAt   DateTime?
+}
+
+// ========== النتائج ==========
+model Result {
+  id               String   @id @default(cuid())
+  student          Student  @relation(fields: [studentId], references: [id])
+  studentId        String
+  submission       Submission? @relation(fields: [submissionId], references: [id])
+  submissionId     String?   @unique
+  // أو يمكن أن يكون مرجعاً لـ Exam
+  // referenceType  String   // ASSIGNMENT | EXAM
+  // referenceId    String
+  totalMarks       Float
+  obtainedMarks    Float
+  percentage       Float
+  correctCount     Int
+  wrongCount       Int
+  unattemptedCount Int
+  timeTakenSeconds Int?
+  attemptNumber    Int
+  status           ResultStatus @default(PENDING)
+  gradedAt         DateTime?
+}
+
+enum ResultStatus {
+  PENDING
+  PARTIALLY_GRADED
+  COMPLETED
+}
