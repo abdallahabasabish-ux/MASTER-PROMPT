@@ -1,0 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #6D28D9; /* بنفسجي ملكي عميق */
+  --primary-light: #8B5CF6; /* بنفسجي فاتح */
+  --primary-bg: #F5F3FF; /* خلفية بنفسجية فاتحة جداً */
+  --bg-main: #FAFAFA; /* خلفية الموقع الرمادية الفاتحة */
+  --bg-card: #FFFFFF; /* خلفية البطاقات بيضاء */
+  --text-main: #1E293B; /* نص أساسي داكن */
+  --text-muted: #64748B; /* نص ثانوي رمادي */
+  --border: #E2E8F0; /* حدود رمادية فاتحة */
+  --success: #10B981;
+  --error: #EF4444;
+}
+
+* {
+  font-family: 'Cairo', sans-serif;
+}
+
+body {
+  background-color: var(--bg-main);
+  -webkit-font-smoothing: antialiased;
+  color: var(--text-main);
+}
+
+/* تخصيص شريط التمرير ليتناسب مع الألوان */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-light);
+}
