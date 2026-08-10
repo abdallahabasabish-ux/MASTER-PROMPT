@@ -10,10 +10,12 @@ import StudentDashboard from "./pages/student/Dashboard";
 import Subscription from "./pages/student/Subscription";
 import LessonsList from "./pages/student/LessonsList";
 import LessonViewer from "./pages/student/LessonViewer";
+import TakeExam from "./pages/student/TakeExam";
 
 // Admin
 import AdminRoute from "./components/AdminRoute";
 import AdminPayments from "./pages/admin/Payments";
+import ExamBuilder from "./pages/admin/ExamBuilder";
 
 export default function App() {
   return (
@@ -30,9 +32,11 @@ export default function App() {
           <Route path="/student/subscription" element={<StudentRoute><Subscription /></StudentRoute>} />
           <Route path="/student/lessons" element={<StudentRoute><LessonsList /></StudentRoute>} />
           <Route path="/student/lessons/:lessonId" element={<StudentRoute><LessonViewer /></StudentRoute>} />
+          <Route path="/student/exams/:examId" element={<StudentRoute><TakeExam /></StudentRoute>} />
 
           {/* Admin Protected */}
           <Route path="/admin/payments" element={<AdminRoute><AdminPayments /></AdminRoute>} />
+          <Route path="/admin/exams/create" element={<AdminRoute><ExamBuilder /></AdminRoute>} />
         </Routes>
       </Router>
     </AuthProvider>
