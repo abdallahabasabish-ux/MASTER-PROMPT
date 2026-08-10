@@ -7,6 +7,7 @@
   --error-bg: #3d1f1f;
   --error-text: #ff4d4d;
 }
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Cairo', sans-serif; background-color: var(--bg-color); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; }
 .auth-card { background: var(--card-bg); padding: 40px; border-radius: 8px; width: 100%; max-width: 400px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
