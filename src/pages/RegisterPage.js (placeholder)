@@ -1,0 +1,270 @@
+export default class RegisterPage {
+  constructor(params) {
+    this.params = params;
+  }
+  
+  async render(container) {
+    container.innerHTML = `
+      <div class="auth-page">
+        <div class="container">
+          <div class="auth-card register-card">
+            <div class="auth-header">
+              <h2>إنشاء حساب جديد</h2>
+              <p>سجل بياناتك وبيانات ولي الأمر للبدء</p>
+            </div>
+            <form id="registerForm" class="auth-form">
+              <div class="form-row">
+                <div class="input-group">
+                  <label for="firstName">الاسم الأول <span class="required">*</span></label>
+                  <input type="text" id="firstName" placeholder="أحمد" required />
+                </div>
+                <div class="input-group">
+                  <label for="lastName">الاسم الثاني <span class="required">*</span></label>
+                  <input type="text" id="lastName" placeholder="محمد" required />
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="input-group">
+                  <label for="stage">المرحلة التعليمية <span class="required">*</span></label>
+                  <select id="stage" required>
+                    <option value="">اختر المرحلة</option>
+                    <option value="primary">المرحلة الابتدائية</option>
+                    <option value="preparatory">المرحلة الإعدادية</option>
+                    <option value="secondary">المرحلة الثانوية</option>
+                  </select>
+                </div>
+                <div class="input-group">
+                  <label for="grade">الصف الدراسي <span class="required">*</span></label>
+                  <select id="grade" required>
+                    <option value="">اختر الصف</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div class="input-group">
+                <label for="governorate">المحافظة <span class="required">*</span></label>
+                <input type="text" id="governorate" placeholder="القاهرة" required />
+              </div>
+              
+              <div class="form-row">
+                <div class="input-group">
+                  <label for="guardianName">اسم ولي الأمر <span class="required">*</span></label>
+                  <input type="text" id="guardianName" placeholder="خالد أحمد" required />
+                </div>
+                <div class="input-group">
+                  <label for="guardianPhone">رقم ولي الأمر <span class="required">*</span></label>
+                  <input type="tel" id="guardianPhone" placeholder="01012345678" required />
+                  <span class="helper-text">رقم هاتف صحيح مكون من 11 رقم</span>
+                </div>
+              </div>
+              
+              <div class="input-group">
+                <label for="email">البريد الإلكتروني <span class="required">*</span></label>
+                <input type="email" id="email" placeholder="ahmed@example.com" required />
+              </div>
+              
+              <div class="input-group">
+                <label for="password">كلمة المرور <span class="required">*</span></label>
+                <input type="password" id="password" placeholder="أدخل كلمة المرور" required />
+                <span class="helper-text">يجب أن تحتوي على 8 أحرف على الأقل</span>
+              </div>
+              
+              <div class="input-group">
+                <label for="confirmPassword">تأكيد كلمة المرور <span class="required">*</span></label>
+                <input type="password" id="confirmPassword" placeholder="أعد إدخال كلمة المرور" required />
+              </div>
+              
+              <div class="terms">
+                <label>
+                  <input type="checkbox" id="terms" required />
+                  أوافق على <a href="#">شروط الاستخدام</a> و <a href="#">سياسة الخصوصية</a>
+                </label>
+              </div>
+              
+              <button type="submit" class="btn btn-primary btn-lg w-full">إنشاء الحساب</button>
+            </form>
+            <div class="auth-footer">
+              <p>لديك حساب بالفعل؟ <a href="/login">تسجيل الدخول</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    this.loadStyles();
+    this.setupForm(container);
+  }
+  
+  loadStyles() {
+    if (document.getElementById('register-styles')) return;
+    
+    const style = document.createElement('style');
+    style.id = 'register-styles';
+    style.textContent = `
+      .register-card {
+        max-width: 560px;
+      }
+      
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-3);
+      }
+      
+      .terms {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        font-size: var(--text-sm);
+        color: var(--text-secondary);
+      }
+      
+      .terms a {
+        color: var(--primary);
+        font-weight: 500;
+      }
+      
+      .helper-text {
+        font-size: var(--text-xs);
+        color: var(--text-muted);
+      }
+      
+      .required {
+        color: var(--danger);
+      }
+      
+      @media (max-width: 480px) {
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  
+  setupForm(container) {
+    const form = container.querySelector('#registerForm');
+    const stageSelect = form.querySelector('#stage');
+    const gradeSelect = form.querySelector('#grade');
+    
+    // Grade options by stage
+    const gradeOptions = {
+      primary: ['الصف الأول الابتدائي', 'الصف الثاني الابتدائي', 'الصف الثالث الابتدائي', 'الصف الرابع الابتدائي', 'الصف الخامس الابتدائي', 'الصف السادس الابتدائي'],
+      preparatory: ['الصف الأول الإعدادي', 'الصف الثاني الإعدادي', 'الصف الثالث الإعدادي'],
+      secondary: ['الصف الأول الثانوي', 'الصف الثاني الثانوي', 'الصف الثالث الثانوي']
+    };
+    
+    stageSelect.addEventListener('change', () => {
+      const stage = stageSelect.value;
+      gradeSelect.innerHTML = '<option value="">اختر الصف</option>';
+      
+      if (stage && gradeOptions[stage]) {
+        gradeOptions[stage].forEach(grade => {
+          const option = document.createElement('option');
+          option.value = grade;
+          option.textContent = grade;
+          gradeSelect.appendChild(option);
+        });
+      }
+    });
+    
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const data = {
+        firstName: form.querySelector('#firstName').value.trim(),
+        lastName: form.querySelector('#lastName').value.trim(),
+        stage: form.querySelector('#stage').value,
+        grade: form.querySelector('#grade').value,
+        governorate: form.querySelector('#governorate').value.trim(),
+        guardianName: form.querySelector('#guardianName').value.trim(),
+        guardianPhone: form.querySelector('#guardianPhone').value.trim(),
+        email: form.querySelector('#email').value.trim(),
+        password: form.querySelector('#password').value,
+        confirmPassword: form.querySelector('#confirmPassword').value,
+        terms: form.querySelector('#terms').checked
+      };
+      
+      // Validation
+      if (!data.firstName || !data.lastName) {
+        showToast('يرجى إدخال الاسم الكامل', 'error');
+        return;
+      }
+      
+      if (!data.stage || !data.grade) {
+        showToast('يرجى اختيار المرحلة والصف الدراسي', 'error');
+        return;
+      }
+      
+      if (!data.governorate) {
+        showToast('يرجى إدخال المحافظة', 'error');
+        return;
+      }
+      
+      if (!data.guardianName || !data.guardianPhone) {
+        showToast('يرجى إدخال بيانات ولي الأمر', 'error');
+        return;
+      }
+      
+      if (data.guardianPhone.length !== 11 || !/^01[0-9]{9}$/.test(data.guardianPhone)) {
+        showToast('يرجى إدخال رقم هاتف صحيح مكون من 11 رقم', 'error');
+        return;
+      }
+      
+      if (!data.email || !data.email.includes('@')) {
+        showToast('يرجى إدخال بريد إلكتروني صحيح', 'error');
+        return;
+      }
+      
+      if (data.password.length < 8) {
+        showToast('كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل', 'error');
+        return;
+      }
+      
+      if (data.password !== data.confirmPassword) {
+        showToast('كلمتا المرور غير متطابقتين', 'error');
+        return;
+      }
+      
+      if (!data.terms) {
+        showToast('يرجى الموافقة على شروط الاستخدام', 'error');
+        return;
+      }
+      
+      // Submit
+      const btn = form.querySelector('button[type="submit"]');
+      const originalText = btn.textContent;
+      btn.textContent = 'جاري إنشاء الحساب...';
+      btn.disabled = true;
+      
+      try {
+        const { registerUser } = await import('../firebase/auth.js');
+        const result = await registerUser(data.email, data.password, {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          grade: data.grade,
+          stage: data.stage,
+          governorate: data.governorate,
+          guardianName: data.guardianName,
+          guardianPhone: data.guardianPhone
+        });
+        
+        if (result.success) {
+          showToast('تم إنشاء الحساب بنجاح! يرجى تفعيل حسابك عبر البريد الإلكتروني');
+          setTimeout(() => {
+            window.location.href = '/login';
+          }, 3000);
+        } else {
+          showToast(result.error || 'فشل إنشاء الحساب', 'error');
+        }
+      } catch (error) {
+        showToast('حدث خطأ غير متوقع', 'error');
+        console.error('Registration error:', error);
+      } finally {
+        btn.textContent = originalText;
+        btn.disabled = false;
+      }
+    });
+  }
+}
