@@ -1,0 +1,85 @@
+:root {
+  /* Colors */
+  --primary: #6D28D9;
+  --primary-dark: #4C1D95;
+  --primary-light: #8B5CF6;
+  --primary-bg: #F5F0FF;
+  
+  --background: #FAF9FF;
+  --surface: #FFFFFF;
+  --surface-secondary: #F8F7FC;
+  
+  --text: #171321;
+  --text-secondary: #3D3750;
+  --text-muted: #6B6575;
+  
+  --border: #E9E3F5;
+  --border-light: #F3EFF8;
+  
+  --success: #16A34A;
+  --success-bg: #F0FDF4;
+  --warning: #F59E0B;
+  --warning-bg: #FFFBEB;
+  --danger: #DC2626;
+  --danger-bg: #FEF2F2;
+  --info: #3B82F6;
+  --info-bg: #EFF6FF;
+  
+  /* Typography */
+  --font-arabic: 'Cairo', 'Segoe UI', system-ui, sans-serif;
+  --font-english: 'Inter', system-ui, sans-serif;
+  
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+  
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+  
+  /* Border Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+  --radius-full: 9999px;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(109, 40, 217, 0.05);
+  --shadow-md: 0 4px 12px rgba(109, 40, 217, 0.08);
+  --shadow-lg: 0 8px 24px rgba(109, 40, 217, 0.10);
+  --shadow-xl: 0 16px 48px rgba(109, 40, 217, 0.12);
+  
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 350ms ease;
+  
+  /* Z-Index */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+  --z-toast: 1080;
+}
