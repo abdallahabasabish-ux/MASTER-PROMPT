@@ -24,3 +24,38 @@
 - **CI/CD**: GitHub Actions
 
 ## 📁 هيكل المشروع
+dr-science/
+├── src/
+│ ├── assets/ # Styles, images, fonts
+│ ├── components/ # Reusable UI components
+│ ├── core/ # Router, store, events
+│ ├── firebase/ # Firebase configuration
+│ ├── pages/ # Page components
+│ ├── services/ # Business logic
+│ └── utils/ # Helpers, validators
+├── firebase/
+│ ├── firestore.rules
+│ ├── storage.rules
+│ └── functions/
+├── public/
+├── .env.example
+├── package.json
+├── vite.config.js
+└── README.md
+
+text
+
+## 🚦 الإعداد والتشغيل
+
+### المتطلبات الأساسية
+
+- Node.js (v18+)
+- npm (v9+)
+- حساب Firebase
+
+### خطوات التثبيت
+
+1. **نسخ المشروع**
+```bash
+git clone https://github.com/your-username/dr-science.git
+cd dr-science
