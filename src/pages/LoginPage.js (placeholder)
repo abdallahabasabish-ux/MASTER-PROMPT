@@ -1,0 +1,181 @@
+export default class LoginPage {
+  constructor(params) {
+    this.params = params;
+  }
+  
+  async render(container) {
+    container.innerHTML = `
+      <div class="auth-page">
+        <div class="container">
+          <div class="auth-card">
+            <div class="auth-header">
+              <h2>تسجيل الدخول</h2>
+              <p>مرحباً بعودتك! سجل دخولك للمتابعة</p>
+            </div>
+            <form id="loginForm" class="auth-form">
+              <div class="input-group">
+                <label for="email">البريد الإلكتروني</label>
+                <input type="email" id="email" placeholder="أدخل بريدك الإلكتروني" required />
+              </div>
+              <div class="input-group">
+                <label for="password">كلمة المرور</label>
+                <input type="password" id="password" placeholder="أدخل كلمة المرور" required />
+              </div>
+              <div class="auth-options">
+                <a href="/forgot-password" class="forgot-link">نسيت كلمة المرور؟</a>
+              </div>
+              <button type="submit" class="btn btn-primary btn-lg w-full">تسجيل الدخول</button>
+            </form>
+            <div class="auth-footer">
+              <p>ليس لديك حساب؟ <a href="/register">إنشاء حساب جديد</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    this.loadStyles();
+    this.setupForm(container);
+  }
+  
+  loadStyles() {
+    if (document.getElementById('auth-styles')) return;
+    
+    const style = document.createElement('style');
+    style.id = 'auth-styles';
+    style.textContent = `
+      .auth-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--background);
+        padding: var(--space-4);
+      }
+      
+      .auth-card {
+        background: var(--surface);
+        border-radius: var(--radius-2xl);
+        padding: var(--space-8);
+        max-width: 420px;
+        width: 100%;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border);
+      }
+      
+      .auth-header {
+        text-align: center;
+        margin-bottom: var(--space-6);
+      }
+      
+      .auth-header h2 {
+        font-size: var(--text-2xl);
+        margin-bottom: var(--space-2);
+      }
+      
+      .auth-header p {
+        color: var(--text-muted);
+        font-size: var(--text-sm);
+      }
+      
+      .auth-form {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+      }
+      
+      .auth-form .input-group {
+        gap: var(--space-1);
+      }
+      
+      .auth-options {
+        display: flex;
+        justify-content: flex-end;
+      }
+      
+      .forgot-link {
+        font-size: var(--text-sm);
+        color: var(--primary);
+      }
+      
+      .forgot-link:hover {
+        color: var(--primary-dark);
+      }
+      
+      .w-full {
+        width: 100%;
+      }
+      
+      .auth-footer {
+        text-align: center;
+        margin-top: var(--space-6);
+        padding-top: var(--space-4);
+        border-top: 1px solid var(--border);
+        font-size: var(--text-sm);
+        color: var(--text-muted);
+      }
+      
+      .auth-footer a {
+        color: var(--primary);
+        font-weight: 600;
+      }
+      
+      .auth-footer a:hover {
+        color: var(--primary-dark);
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  
+  setupForm(container) {
+    const form = container.querySelector('#loginForm');
+    
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = form.querySelector('#email').value;
+      const password = form.querySelector('#password').value;
+      
+      // Basic validation
+      if (!email || !password) {
+        showToast('يرجى ملء جميع الحقول', 'error');
+        return;
+      }
+      
+      // Submit button loading
+      const btn = form.querySelector('button[type="submit"]');
+      const originalText = btn.textContent;
+      btn.textContent = 'جاري تسجيل الدخول...';
+      btn.disabled = true;
+      
+      try {
+        const { loginUser } = await import('../firebase/auth.js');
+        const result = await loginUser(email, password);
+        
+        if (result.success) {
+          showToast('تم تسجيل الدخول بنجاح');
+          // Router will handle redirect based on role
+        } else {
+          showToast(result.message || 'فشل تسجيل الدخول', 'error');
+        }
+      } catch (error) {
+        showToast('حدث خطأ غير متوقع', 'error');
+        console.error('Login error:', error);
+      } finally {
+        btn.textContent = originalText;
+        btn.disabled = false;
+      }
+    });
+  }
+}
+
+// Helper for toast
+function showToast(message, type = 'success') {
+  // Use the global toast from main.js
+  if (window.showToast) {
+    window.showToast(message, type);
+  } else {
+    // Fallback
+    alert(message);
+  }
+}
