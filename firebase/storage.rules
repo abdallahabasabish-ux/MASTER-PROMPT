@@ -1,0 +1,76 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+             request.auth.token.role == 'admin';
+    }
+    
+    function isTeacher() {
+      return isAuthenticated() && 
+             request.auth.token.role == 'teacher';
+    }
+    
+    function isStudent() {
+      return isAuthenticated() && 
+             request.auth.token.role == 'student';
+    }
+    
+    function isVerifiedStudent() {
+      return isStudent() &&
+             request.auth.token.status == 'verified';
+    }
+    
+    // ==================== LESSON THUMBNAILS ====================
+    
+    match /thumbnails/{lessonId}/{fileName} {
+      allow read: if isAuthenticated() && isVerifiedStudent();
+      allow write: if isAdmin() || isTeacher();
+      allow delete: if isAdmin();
+    }
+    
+    // ==================== PDF FILES ====================
+    
+    match /pdfs/{lessonId}/{fileName} {
+      allow read: if isAuthenticated() && isVerifiedStudent();
+      allow write: if isAdmin() || isTeacher();
+      allow delete: if isAdmin();
+    }
+    
+    // ==================== LESSON VIDEOS ====================
+    
+    match /videos/{lessonId}/{fileName} {
+      allow read: if isAuthenticated() && isVerifiedStudent();
+      allow write: if isAdmin() || isTeacher();
+      allow delete: if isAdmin();
+    }
+    
+    // ==================== USER AVATARS ====================
+    
+    match /avatars/{userId}/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && userId == request.auth.uid;
+      allow delete: if isAuthenticated() && userId == request.auth.uid;
+    }
+    
+    // ==================== TEMP UPLOADS ====================
+    
+    match /temp/{userId}/{fileName} {
+      allow write: if isAuthenticated() && userId == request.auth.uid;
+      allow read: if isAuthenticated() && userId == request.auth.uid;
+      allow delete: if isAuthenticated() && userId == request.auth.uid;
+    }
+    
+    // ==================== DEFAULT ====================
+    
+    // Deny all other access
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
