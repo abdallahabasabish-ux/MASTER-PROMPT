@@ -1,6 +1,5 @@
 @import './variables.css';
 
-/* Buttons */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -96,7 +95,6 @@
   transform: none !important;
 }
 
-/* Inputs */
 .input-group {
   display: flex;
   flex-direction: column;
