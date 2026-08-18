@@ -3,7 +3,6 @@
 @import './components.css';
 @import './utilities.css';
 
-/* Reset & Base */
 *, *::before, *::after {
   box-sizing: border-box;
 }
